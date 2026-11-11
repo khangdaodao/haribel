@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dino Quiz – Past Simple &amp; Past Continuous</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f7f7f7;--ink:#535353;--soft:#cfcfcf;--card:#fff;--good:#3b7d3b;--bad:#b23a3a;--dw:70px;--cw:32px;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#202124;--ink:#d6d6d6;--soft:#4a4b4f;--card:#2b2c30;--good:#7fc47f;--bad:#e58080}}
+:root[data-theme="dark"]{--bg:#202124;--ink:#d6d6d6;--soft:#4a4b4f;--card:#2b2c30;--good:#7fc47f;--bad:#e58080}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font-family:"Silkscreen","Courier New",monospace;overflow:hidden;text-transform:uppercase}
+h1,h2{font-family:"Press Start 2P","Courier New",monospace;font-weight:400;margin:0;line-height:1.35;text-align:center}
+#stage{position:relative;height:100%;width:100%;display:flex;flex-direction:column;overflow:hidden}
+#ui{position:relative;z-index:2;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px 16px 150px;gap:18px;text-align:center;overflow:auto}
+#ground{position:absolute;left:0;right:0;bottom:0;height:130px;pointer-events:none;z-index:1}
+#ground .line{position:absolute;left:0;right:0;top:78px;border-top:3px solid var(--ink)}
+#ground .dots{position:absolute;left:0;right:0;top:86px;height:30px;background:var(--ink);opacity:.6;
+-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='30'%3E%3Cpath d='M6 4h8v2H6zM40 14h4v2h-4zM62 8h2v2h-2zM90 18h10v2H90zM120 6h4v2h-4zM150 22h6v2h-6zM178 12h2v2h-2zM200 4h8v2h-8zM226 20h4v2h-4zM20 24h4v2h-4zM110 26h2v2h-2z'/%3E%3C/svg%3E") repeat-x 0 0/240px 30px;
+mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='30'%3E%3Cpath d='M6 4h8v2H6zM40 14h4v2h-4zM62 8h2v2h-2zM90 18h10v2H90zM120 6h4v2h-4zM150 22h6v2h-6zM178 12h2v2h-2zM200 4h8v2h-8zM226 20h4v2h-4zM20 24h4v2h-4zM110 26h2v2h-2z'/%3E%3C/svg%3E") repeat-x 0 0/240px 30px;
+animation:scroll .55s linear infinite}
+#ground.stop .dots{animation-play-state:paused}
+@keyframes scroll{to{-webkit-mask-position:-240px 0;mask-position:-240px 0}}
+#dinoWrap{position:absolute;left:max(18px,6%);top:calc(81px - var(--dw)*1.2);width:var(--dw);transform-origin:50% 100%;transition:transform .25s}
+#dinoWrap svg{display:block;width:100%;fill:var(--ink)}
+#dinoWrap.dead{transform:translateX(-18px) rotate(-12deg)}
+#dinoWrap .la{animation:la .26s steps(1) infinite}#dinoWrap .lb{animation:lb .26s steps(1) infinite}
+@keyframes la{0%{opacity:1}50%{opacity:0}}@keyframes lb{0%{opacity:0}50%{opacity:1}}
+#dinoWrap .ls,#dinoWrap .sq{display:none}
+#dinoWrap.air .la,#dinoWrap.air .lb,#dinoWrap.dead .la,#dinoWrap.dead .lb{display:none}
+#dinoWrap.air .ls,#dinoWrap.dead .ls,#dinoWrap.dead .sq{display:inline}
+.tear{position:absolute;width:5px;height:7px;background:#5aa9e6;display:none;top:13%}
+#dinoWrap.dead .tear{display:block;animation:fall .7s linear infinite}
+.tear.t2{animation-delay:.35s!important;margin-left:8px}
+@keyframes fall{0%{transform:translateY(0);opacity:1}100%{transform:translateY(30px);opacity:0}}
+#cactus{position:absolute;display:none;width:var(--cw);top:calc(81px - var(--cw)*2);fill:var(--ink)}
+.cloud{position:absolute;fill:var(--soft);z-index:0;width:90px;left:0;animation:drift 50s linear infinite}
+@keyframes drift{from{transform:translateX(105vw)}to{transform:translateX(-140px)}}
+.btn{font:inherit;color:var(--ink);background:var(--card);border:2px solid var(--ink);border-radius:10px;padding:14px 18px;cursor:pointer;box-shadow:4px 4px 0 var(--ink);text-transform:uppercase;font-size:14px;min-width:150px}
+.btn:hover:not(:disabled){transform:translate(-1px,-1px)}
+.btn:active:not(:disabled){transform:translate(3px,3px);box-shadow:1px 1px 0 var(--ink)}
+.btn:focus-visible,input:focus-visible,.chunk:focus-visible,#music:focus-visible{outline:3px dashed var(--ink);outline-offset:3px}
+.btn:disabled{opacity:.35;cursor:not-allowed;box-shadow:none}
+.row{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;max-width:720px}
+.box{border:2px solid var(--ink);padding:14px 16px;min-width:190px}
+.sub{font-size:13px;letter-spacing:.06em;max-width:560px;line-height:1.7}
+.hud{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));left:0;right:0;display:flex;justify-content:space-between;padding:0 16px;z-index:3;font-size:13px}
+.heart{width:18px;height:16px;fill:var(--ink);margin-right:4px}.heart.lost{fill:var(--soft)}
+#music{display:none;position:absolute;z-index:4;left:16px;top:calc(46px + env(safe-area-inset-top,0px));width:42px;height:42px;padding:0;border:0;cursor:pointer;background:var(--ink);
+clip-path:polygon(20% 0,80% 0,80% 10%,90% 10%,90% 20%,100% 20%,100% 80%,90% 80%,90% 90%,80% 90%,80% 100%,20% 100%,20% 90%,10% 90%,10% 80%,0 80%,0 20%,10% 20%,10% 10%,20% 10%)}
+#music svg{width:22px;height:22px;fill:var(--bg);display:block;margin:auto}
+#music .slash{display:none}#music.off .slash{display:inline;fill:var(--bad)}#music.off .note{opacity:.6}
+#music:active{transform:translate(2px,2px)}
+.pips{display:flex;gap:5px;justify-content:center;margin-top:8px}.pip{width:12px;height:12px;border:2px solid var(--ink)}.pip.on{background:var(--ink)}
+.tag{font-size:13px;letter-spacing:.1em}
+.q{font-size:clamp(14px,2.6vw,24px);max-width:760px}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:min(640px,100%)}
+.opt{min-width:0;padding:14px 10px}
+.opt.right,.chunk.right{background:var(--good);color:#fff;border-color:var(--good)}
+.opt.wrong,.chunk.wrong{background:var(--bad);color:#fff;border-color:var(--bad)}
+.chunks{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:760px}
+.chunk{font:inherit;font-size:15px;color:var(--ink);background:var(--card);border:2px dashed var(--ink);border-radius:8px;padding:10px 12px;cursor:pointer;text-transform:none}
+input.in{font:inherit;font-size:16px;text-transform:none;color:var(--ink);background:var(--card);border:2px solid var(--ink);border-radius:8px;padding:8px 10px;width:170px;text-align:center}
+.fb{font-size:14px;max-width:600px;line-height:1.7;min-height:48px}
+.fb b{font-family:"Press Start 2P","Courier New",monospace;font-weight:400;display:block;margin-bottom:6px;font-size:15px}
+.good{color:var(--good)}.bad{color:var(--bad)}
+.fs{position:absolute;right:14px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:3;min-width:0;padding:6px 10px;font-size:11px;box-shadow:2px 2px 0 var(--ink)}
+.blink{animation:b 1s steps(2) infinite}@keyframes b{50%{opacity:.25}}
+@media (prefers-reduced-motion:reduce){.blink,.cloud,#ground .dots,#dinoWrap .la,#dinoWrap .lb{animation:none}}
+@media (max-width:560px){.opts{grid-template-columns:1fr}:root{--dw:54px;--cw:26px}}
+</style>
+</head>
+<body>
+<div id="stage">
+  <svg class="cloud" style="top:14%" viewBox="0 0 24 8" shape-rendering="crispEdges"><path d="M2 6h20v1H2zM4 4h4v2H4zM8 2h6v2H8zM14 3h5v3h-5z"/></svg>
+  <svg class="cloud" style="top:26%;animation-duration:70s;animation-delay:-30s" viewBox="0 0 24 8" shape-rendering="crispEdges"><path d="M2 6h20v1H2zM4 4h4v2H4zM8 2h6v2H8zM14 3h5v3h-5z"/></svg>
+  <div id="ui"></div>
+  <div id="ground">
+    <div class="line"></div><div class="dots"></div>
+    <svg id="cactus" viewBox="0 0 7 14" shape-rendering="crispEdges"></svg>
+    <div id="dinoWrap">
+      <svg id="dino" viewBox="0 0 20 24" shape-rendering="crispEdges"></svg>
+      <span class="tear" style="left:57%"></span><span class="tear t2" style="left:57%"></span>
+    </div>
+  </div>
+  <button id="music" aria-label="Music on/off" title="Music"><svg viewBox="0 0 9 9" shape-rendering="crispEdges"></svg></button>
+  <button class="btn fs" id="fs" aria-label="Fullscreen">Full screen</button>
+</div>
+<script>
+/* ===== MUSIC =====
+   Để trống = nhạc 8-bit tự tạo sẵn. Muốn dùng nhạc của bạn: đặt file cạnh dino-game.html
+   rồi sửa dòng dưới thành MUSIC_SRC = "music.mp3" (hoặc gửi file cho Claude để nhúng thẳng vào trang). */
+const MUSIC_SRC = "nhac.mp3";
+
+const BODY=["........XXXXXXXXXXX.","........XXXXXXXXXXXX","........XXX..XXXXXXX","........XXX..XXXXXXX","........XXXXXXXXXXXX","........XXXXXXXXXXXX","........XXXXXXXXXX..","........XXXXXXX.....","X......XXXXXXX......","X.....XXXXXXXX......","XX....XXXXXXXXXX....","XX...XXXXXXXXXX.XX..","XXX..XXXXXXXXXXXXX..","XXXXXXXXXXXXXXX.....",".XXXXXXXXXXXXXX.....",".XXXXXXXXXXXXX......","..XXXXXXXXXXXX......","...XXXXXXXXXXX......","....XXXXXXXXX.......",".....XXXXXXXX......."];
+const LEGA=[".....XXX...XXX......",".....XX....XXX......",".....XX.............",".....XXX............"];
+const LEGB=[".....XXX...XXX......",".....XXX...XX.......","...........XX.......","...........XXX......"];
+const LEGS=[".....XXX...XXX......",".....XX....XX.......",".....XX....XX.......",".....XXX...XXX......"];
+const CACT=["...XX..","...XX.X","X..XX.X","X..XX.X","XX.XX.X",".XXXXXX","...XX..","...XX..","...XX..","...XX..","...XX..","...XX..","...XX..","...XX.."];
+const HEART=["XX.XX","XXXXX","XXXXX",".XXX.","..X.."];
+const NOTE=["....XXX..","....XXXX.","....X.XXX","....X...X","....X....","....X....","..XXX....",".XXXX....","..XX....."];
+function px(g,oy=0){let s="";g.forEach((r,y)=>{[...r].forEach((c,x)=>{if(c==="X")s+=`<rect x="${x}" y="${y+oy}" width="1" height="1"/>`})});return s}
+const heartSvg=cls=>`<svg class="heart ${cls}" viewBox="0 0 5 5" shape-rendering="crispEdges">${px(HEART)}</svg>`;
+dino.innerHTML=px(BODY)+`<g class="la">${px(LEGA,20)}</g><g class="lb">${px(LEGB,20)}</g><g class="ls">${px(LEGS,20)}</g><rect class="sq" x="11" y="2" width="2" height="1"/>`;
+cactus.innerHTML=px(CACT);
+music.firstElementChild.innerHTML=`<g class="note">${px(NOTE)}</g><path class="slash" d="M0 7l1-1 8-6v1zM0 8l9-7v1L1 8z"/><rect class="slash" x="0" y="8" width="1" height="1"/>`;
+const Q={
+mc:[
+ {q:"While I ___ TV, the phone rang.",o:["watched","was watching","watch","am watching"],a:1},
+ {q:"She ___ to Da Nang last summer.",o:["was going","goes","went","has gone"],a:2},
+ {q:"What ___ you ___ at 8 p.m. last night?",o:["did / do","were / doing","are / doing","do / doing"],a:1},
+ {q:"They ___ football when it started to rain.",o:["played","were playing","plays","play"],a:1},
+ {q:"He ___ his keys yesterday.",o:["was losing","loses","lost","is losing"],a:2}],
+fb:[
+ {t:"I ___ (visit) my grandparents last weekend.",a:[["visited"]]},
+ {t:"At 9 o’clock yesterday, she ___ (cook) dinner.",a:[["was cooking"]]},
+ {t:"He ___ (not / go) to school yesterday.",a:[["didn't go","did not go"]]},
+ {t:"When Tom ___ (arrive), we ___ (have) lunch.",a:[["arrived"],["were having"]]},
+ {t:"While they ___ (walk) in the park, they ___ (see) a snake.",a:[["were walking"],["saw"]]}],
+fm:[
+ {c:["I was watching TV","when my mother","was coming","home."],w:2,fix:"came"},
+ {c:["She","didn’t","went","to school yesterday."],w:2,fix:"go"},
+ {c:["What","did","you doing","at 7 p.m. last night?"],w:1,fix:"were"},
+ {c:["While he","cooked","dinner,","the phone rang."],w:1,fix:"was cooking"},
+ {c:["We","was","playing football","when it began to rain."],w:1,fix:"were"}]
+};
+const NAMES={mc:"Multiple choice",fb:"Fill the blank",fm:"Find the mistake"};
+const MAXLIVES=3;
+let S={lives:MAXLIVES,score:0,left:{mc:5,fb:5,fm:5},over:false};
+const ui=document.getElementById("ui");
+const norm=s=>s.toLowerCase().replace(/[’‘]/g,"'").replace(/\s+/g," ").trim();
+const esc=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;");
+function hud(){return `<div class="hud"><span>Lives ${Array.from({length:MAXLIVES},(_,i)=>heartSvg(i<S.lives?"":"lost")).join("")}</span><span>Score ${S.score}/15</span></div>`}
+function show(h){ui.innerHTML=h}
+
+/* ===== MUSIC ENGINE ===== */
+const M={on:false,audio:null,ctx:null,timer:null,started:false};
+function chip(){
+  const C=M.ctx=new (window.AudioContext||window.webkitAudioContext)();
+  const g=C.createGain();g.gain.value=.06;g.connect(C.destination);
+  const lead=[69,72,76,72,69,72,76,81,67,71,74,71,67,71,74,79,65,69,72,69,65,69,72,77,67,71,74,71,67,71,74,79];
+  const bass=[45,45,52,45,43,43,50,43,41,41,48,41,43,43,50,43];
+  const f=m=>440*Math.pow(2,(m-69)/12);
+  const note=(m,t,d,type,v)=>{const o=C.createOscillator(),e=C.createGain();o.type=type;o.frequency.value=f(m);e.gain.setValueAtTime(v,t);e.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(e);e.connect(g);o.start(t);o.stop(t+d)};
+  let step=0,next=C.currentTime+.1;const dt=.15;
+  M.timer=setInterval(()=>{while(next<C.currentTime+.4){note(lead[step%32],next,dt*.9,"square",.5);if(step%2===0)note(bass[(step/2)%16],next,dt*1.8,"triangle",.9);step++;next+=dt}},100);
+}
+function musicStart(){
+  if(M.started)return;M.started=true;M.on=true;music.style.display="block";
+  if(MUSIC_SRC){const a=M.audio=new Audio(MUSIC_SRC);a.loop=true;a.onerror=()=>{M.audio=null;chip()};a.play().catch(()=>{});}
+  else chip();
+}
+music.onclick=()=>{M.on=!M.on;music.classList.toggle("off",!M.on);
+  if(M.audio){M.on?M.audio.play():M.audio.pause()}else if(M.ctx){M.on?M.ctx.resume():M.ctx.suspend()}};
+
+/* ===== SCENE ===== */
+function resetScene(){dinoWrap.classList.remove("dead","air");cactus.style.display="none";ground.classList.remove("stop")}
+function jump(){dinoWrap.classList.add("air");
+  const a=dinoWrap.animate([{transform:"translateY(0)",easing:"ease-out"},{transform:"translateY(-105px)",offset:.5,easing:"ease-in"},{transform:"translateY(0)"}],{duration:650});
+  a.onfinish=()=>dinoWrap.classList.remove("air")}
+function obstacle(ok){return new Promise(res=>{
+  const W=ground.clientWidth,dw=dinoWrap.offsetWidth,dx=dinoWrap.offsetLeft,cw=cactus.getBoundingClientRect().width||32;
+  cactus.style.display="block";cactus.style.left=W+"px";
+  const hit=W-(dx+dw*.78),T=1100;
+  if(ok){const tot=W+cw+30;
+    const a=cactus.animate([{transform:"translateX(0)"},{transform:`translateX(${-tot}px)`}],{duration:T*tot/hit,easing:"linear",fill:"forwards"});
+    setTimeout(jump,T-250);a.onfinish=()=>{cactus.style.display="none";res()};
+  }else{
+    const a=cactus.animate([{transform:"translateX(0)"},{transform:`translateX(${-hit}px)`}],{duration:T,easing:"linear",fill:"forwards"});
+    a.onfinish=()=>{dinoWrap.classList.add("dead");ground.classList.add("stop");setTimeout(res,900)};
+  }})}
+
+/* ===== SCREENS ===== */
+function start(){show(`<h1 style="font-size:clamp(28px,7vw,60px)">DINO<br>QUIZ</h1><div class="sub">Past simple vs past continuous</div><button class="btn blink" id="go">Start</button>`);go.onclick=()=>{musicStart();how()}}
+function how(){show(`<h2 style="font-size:clamp(18px,4vw,34px)">How to play</h2><div class="sub">3 types of games. Each type has 5 turns.<br>You have ${MAXLIVES} lives. Wrong answer = lose 1 life. No lives left = game over.</div>
+<div class="row"><div class="box">Multiple choice</div><div class="box">Fill the blank</div><div class="box">Find the mistake</div></div><button class="btn" id="go">Let’s run</button>`);go.onclick=hub}
+function hub(){
+  if(S.over)return;
+  if(!S.left.mc&&!S.left.fb&&!S.left.fm)return win();
+  const b=k=>`<button class="btn" data-k="${k}" ${S.left[k]?"":"disabled"}>${NAMES[k]}<div class="pips">${[0,1,2,3,4].map(i=>`<span class="pip ${i<S.left[k]?"on":""}"></span>`).join("")}</div><div style="margin-top:8px;font-size:12px">${S.left[k]} / 5 turns</div></button>`;
+  show(`${hud()}<h2 style="font-size:clamp(16px,3.4vw,28px)">Choose a game</h2><div class="sub">Each choice uses 1 turn.</div><div class="row">${b("mc")}${b("fb")}${b("fm")}</div>`);
+  ui.querySelectorAll("[data-k]").forEach(el=>el.onclick=()=>ask(el.dataset.k));
+}
+function ask(k){
+  const i=5-S.left[k],d=Q[k][i];let body="";
+  if(k==="mc")body=`<div class="q">${esc(d.q)}</div><div class="opts">${d.o.map((t,j)=>`<button class="btn opt" data-j="${j}">${"ABCD"[j]}. ${esc(t)}</button>`).join("")}</div>`;
+  if(k==="fb"){let n=0;const t=esc(d.t).replace(/___/g,()=>`<input class="in" data-n="${n++}" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="blank ${n}">`);
+    body=`<div class="q" style="line-height:2.4;text-transform:none">${t}</div><button class="btn" id="ok">Check</button>`}
+  if(k==="fm")body=`<div class="sub">Tap the part that has the mistake.</div><div class="chunks">${d.c.map((t,j)=>`<button class="chunk" data-j="${j}">${esc(t)}</button>`).join("")}</div>`;
+  show(`${hud()}<div class="tag">[ ${NAMES[k]} ] ${i+1}/5</div>${body}<div class="fb" id="fb"></div>`);
+  const fin=(ok,msg)=>{
+    S.left[k]--;ui.querySelectorAll("button,input").forEach(e=>e.disabled=true);
+    if(ok)S.score++;else S.lives--;
+    fb.innerHTML=`<b class="${ok?"good":"bad"}">${ok?"Correct!":"Wrong!"}</b>${msg}<div id="nxw"></div>`;
+    obstacle(ok).then(()=>{nxw.innerHTML=`<button class="btn" id="nx" style="margin-top:12px">Continue</button>`;
+      nx.onclick=()=>{if(S.lives<=0)return gameover();resetScene();hub()};nx.focus()});
+  };
+  if(k==="mc")ui.querySelectorAll(".opt").forEach(el=>el.onclick=()=>{const j=+el.dataset.j,ok=j===d.a;
+    el.classList.add(ok?"right":"wrong");if(!ok)ui.querySelector(`[data-j="${d.a}"]`).classList.add("right");
+    fin(ok,ok?"":`Answer: ${"ABCD"[d.a]}. ${esc(d.o[d.a])}`)});
+  if(k==="fb"){const ins=[...ui.querySelectorAll("input")];ins[0].focus();
+    const chk=()=>{const ok=d.a.every((alts,n)=>alts.map(norm).includes(norm(ins[n].value).replace(/^did not /,"didn't ")));
+      fin(ok,ok?"":`Answer: ${esc(d.a.map(a=>a[0]).join(" / "))}`)};
+    document.getElementById("ok").onclick=chk;ins.forEach(e=>e.onkeydown=ev=>{if(ev.key==="Enter")chk()})}
+  if(k==="fm")ui.querySelectorAll(".chunk").forEach(el=>el.onclick=()=>{const j=+el.dataset.j,ok=j===d.w;
+    el.classList.add(ok?"right":"wrong");ui.querySelector(`[data-j="${d.w}"]`).classList.add("right");
+    fin(ok,`Fix: “${esc(d.c[d.w])}” → “${esc(d.fix)}”`)});
+}
+function gameover(){S.over=true;
+  show(`<h1 style="font-size:clamp(26px,6.5vw,56px)">GAME<br>OVER</h1><div class="sub">You got ${S.score} / 15 correct.<br>The dino hit the cactus.<br>Thanks for playing!</div>`)}
+function win(){resetScene();
+  show(`${hud()}<h1 style="font-size:clamp(24px,6vw,50px)">YOU<br>WIN!</h1><div class="sub">You finished all 3 games.<br>Score: ${S.score} / 15 · Lives left: ${S.lives}</div>`)}
+document.getElementById("fs").onclick=()=>{try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}catch(e){}};
+start();
+</script>
+</body>
+</html>
